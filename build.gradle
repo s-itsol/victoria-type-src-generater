@@ -1,0 +1,42 @@
+
+println '--------------------------------------------------------------------------------'
+println ' vitoria-type-src-generater ビルド開始'
+println '--------------------------------------------------------------------------------'
+
+// Javaコンパイラ系のエンコーディング設定
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+group = 'net.sitsol.victoria'
+version = '0.0.2'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	
+	// 各ツール共通
+	testCompile 'junit:junit:4.12'
+	compile 'org.apache.velocity:velocity:1.7'
+	compile 'org.projectlombok:lombok:1.18.0'
+	
+	// Excel読込みツール用
+	compile 'org.apache.poi:poi:4.0.0';
+	compile 'org.apache.poi:poi-ooxml:4.0.0';
+}
+
+// jarの中に外部ライブラリを内包させる設定
+jar {
+//	jar.into('lib') {
+//		from configurations.runtime
+//	}
+//	※こちら↑は外部ライブラリを「lib/」の下にjarのままアーカイブする。コマンドのクラスパス指定が面倒だったので、外部ライブラリもすべて.classに展開してしまう。
+//		実行コマンドは、「java -classpath victoria-type-src-generater-x.x.x.jar net.sitsol.victoria.tsgen.mains.Enum2JavaGenetater」で動かせるようになる。
+	from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}
