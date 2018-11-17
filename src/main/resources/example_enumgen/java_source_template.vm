@@ -1,0 +1,108 @@
+################################################################################
+## [サンプル]生成JAVAソーステンプレート
+##
+##	＜vm変数-クラス型＞
+##	$enumModel：net.sitsol.victoria.tsgen.models.enumgen.EnumModel
+##
+################################################################################
+package ${enumModel.getPackageName()}
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Enum定数クラス「${enumModel.getClassComment()}」
+ * 
+ * @author vitoria-type-src-generater
+ */
+public enum ${enumModel.getClassName()} {
+
+## フィールドモデルのループ
+#foreach($enumFieldModel in $enumModel.getFieldModelList())##
+## 2件目以降は「,」で区切る
+#if($velocityCount > 1)##
+	,
+#end##
+	/** ${enumFieldModel.getFieldComment()} ※${enumFieldModel.getCode()}：${enumFieldModel.getDecode()} */
+	${enumFieldModel.getFieldName()}("${enumFieldModel.getCode()}", "${enumFieldModel.getDecode()}")
+#end##
+	;
+
+	/** 全型リスト */
+	private static final List<${enumModel.getClassName()}> allTypeList_;
+	/** コード値-型マップ */
+	private static final Map<String, ${enumModel.getClassName()}> codeTypeMap_;
+
+	/**
+	 * スタティック・イニシャライザ
+	 */
+	static {
+		
+		${enumModel.getClassName()}[] allTypes = ${enumModel.getClassName()}.values();
+		
+		allTypeList_ = Arrays.asList(allTypes);
+		
+		codeTypeMap_ = new LinkedHashMap<String, ${enumModel.getClassName()}>(allTypes.length);
+		for ( ${enumModel.getClassName()} enumType : allTypes ) {
+			codeTypeMap_.put(enumType.getCode(), enumType);
+		}
+	}
+
+	/**
+	 * 全型リスト
+	 */
+	public static List<${enumModel.getClassName()}> getAllTypeList() {
+		return allTypeList_;
+	}
+
+	/**
+	 * 型取得
+	 * @param code コード値
+	 * @return 型 ※該当なしの場合はnull
+	 */
+	public static ${enumModel.getClassName()} getType(String code) {
+		return codeTypeMap_.get(code);
+	}
+
+	/**
+	 * デコード文字列取得
+	 * @param code コード値
+	 * @return デコード文字列 ※該当なしの場合は空文字
+	 */
+	public static String getDecode(String code) {
+		${enumModel.getClassName()} targetType = getType(code);
+		return targetType != null ? targetType.getDecode() : "";
+	}
+
+	/** コード値 */
+	private final String code;
+	/** デコード文字列 */
+	private final String decode;
+
+	/**
+	 * コンストラクタ
+	 * @param code コード値
+	 * @param decode デコード文字列
+	 */
+	private ${enumModel.getClassName()}(String code, String decode) {
+		this.code = code;
+		this.decode = decode;
+	}
+
+	/**
+	 * コード値
+	 */
+	public String getCode() {
+		return this.code;
+	}
+
+	/**
+	 * デコード文字列
+	 */
+	public String getDecode() {
+		return this.decode;
+	}
+
+}

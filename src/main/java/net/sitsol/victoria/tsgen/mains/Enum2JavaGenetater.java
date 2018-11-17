@@ -3,20 +3,24 @@
  */
 package net.sitsol.victoria.tsgen.mains;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-import net.sitsol.victoria.tsgen.ExcelReadHelper;
 import net.sitsol.victoria.tsgen.configs.EnumGenInitParam;
 import net.sitsol.victoria.tsgen.models.enumgen.EnumFieldModel;
 import net.sitsol.victoria.tsgen.models.enumgen.EnumModel;
+import net.sitsol.victoria.tsgen.tools.ExcelReader;
+import net.sitsol.victoria.tsgen.tools.VelocityTextWriter;
 
 /**
  * Enum2JAVAジェネレータ-起動クラス
@@ -31,6 +35,9 @@ public class Enum2JavaGenetater {
 	 */
 	public static void main(String[] args) {
 		
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+		
 		String propFilePath = null;
 		
 		System.out.println("コマンドライン引数->" + Arrays.asList(args));
@@ -38,8 +45,8 @@ public class Enum2JavaGenetater {
 		// 引数指定なし
 		if ( args == null || args.length < 1 || args[0] == null ) {
 			
-			System.out.println("[ERROR]第1引数(プロパティファイルのパス)が指定されていません。");
-			System.out.println(EnumGenInitParam.DELAULT_PROP_RESOURCE_PATH + "のプロパティファイルを使い、読込みテストモードで実行します。");
+			System.out.println("[WARN]第1引数(設定ファイルのパス)が指定されていません。");
+			System.out.println(EnumGenInitParam.DELAULT_CONFIG_RESOURCE_PATH + "のサンプル設定ファイルに従って実行します。");
 			
 		} else {
 			propFilePath = args[0];
@@ -50,17 +57,43 @@ public class Enum2JavaGenetater {
 		
 		EnumGenInitParam iniParam = EnumGenInitParam.getInstance();		// ※コーディングが長くなるので、ローカル変数に保持させているだけ
 		
-		System.out.println("Enumソース生成を開始します。"
-								+ "読込みテストモード：[" + iniParam.isReadTestMode() + "]"
-								+ ", 読込みExcelファイルパス：[" + iniParam.getEnumFilePath() + "]"
-		);
+		System.out.println("Enumソース生成を開始します。");
+		System.out.println("読込みテストモード：[" + iniParam.isReadTestMode() + "]");
+		System.out.println("読込みExcelファイルパス：[" + iniParam.getEnumFilePath() + "]");
+		System.out.println("出力先Javaソースディレクトリ：[" + iniParam.getJavaSrcWriteDirPath() + "]");
+		System.out.println("--------------------------------------------------------------------------------");
+		
+		// // Velocityテキスト出力支援クラス
+		final VelocityTextWriter writer;
+		{
+			// 読込みテストモードの場合は使わないので生成しない
+			if ( iniParam.isReadTestMode() ) {
+				writer = null;
+				
+			// それ以外
+			} else {
+				
+				File writeDirInfo = new File(iniParam.getJavaSrcWriteDirPath());
+				
+				// 出力先ディレクトリが存在した場合
+				if ( writeDirInfo.exists() ) {
+					// 一旦、配下のファイルを全て削除
+					for ( File file : writeDirInfo.listFiles() ) {
+						file.delete();
+					}
+				}
+				
+				// 出力支援クラス生成
+				writer = new VelocityTextWriter(iniParam.getTemplateReadDirPath(), iniParam.getTemplateFileEncoding(), iniParam.getJavaSrcFileEncoding());
+			}
+		}
 		
 		Map<Integer, String> currentClassInfoMap = new LinkedHashMap<>();		// 処理中クラス情報マップ ※キー：列インデックス、値：セル値(文字列)
 		Map<Integer, String> currentFieldInfoMap = new LinkedHashMap<>();		// 処理中フィールド情報マップ ※キー：列インデックス、値：セル値(文字列)
 		List<Map<Integer, String>> fieldInfoMapList = new ArrayList<>();		// フィールド情報マップリスト
 		
 		// Excelファイル読込み支援クラス生成
-		ExcelReadHelper readHelper = new ExcelReadHelper() {
+		ExcelReader readHelper = new ExcelReader() {
 			
 			/**
 			 * シート読込み
@@ -124,7 +157,7 @@ public class Enum2JavaGenetater {
 						// 処理中クラス情報・フィールド情報マップリストに要素あり(＝１番最初の処理ではない)
 						if ( !currentClassInfoMap.isEmpty() && !fieldInfoMapList.isEmpty() ) {
 							// Enumモデル確定
-							compEnumModel(currentClassInfoMap, fieldInfoMapList);
+							compEnumModel(currentClassInfoMap, fieldInfoMapList, writer);
 						}
 						
 						// 処理中クラス情報マップを初期化
@@ -190,7 +223,7 @@ public class Enum2JavaGenetater {
 			@Override
 			protected void finishReadedSheet(Sheet shee) {
 				// Enumモデル確定 ※最後に読込んだ１件分はここでしか検知できない
-				compEnumModel(currentClassInfoMap, fieldInfoMapList);
+				compEnumModel(currentClassInfoMap, fieldInfoMapList, writer);
 			}
 			
 		};
@@ -198,15 +231,19 @@ public class Enum2JavaGenetater {
 		// Excelファイル読込み
 		readHelper.readExcelFile(iniParam.getEnumFilePath());
 		
-		System.out.println("Enumソース生成が終了しました。");
+		stopWatch.stop();
+		
+		System.out.println("--------------------------------------------------------------------------------");
+		System.out.println("Enumソース生成が終了しました。処理時間：[" + stopWatch.getTime() + "](ms)");
 	}
 	
 	/**
 	 * Enumモデル確定
 	 * @param classInfoMap 処理中クラス情報マップ
 	 * @param fieldInfoMapList フィールド情報マップリスト
+	 * @param writer Velocityテキスト出力支援クラスのインスタンス
 	 */
-	private static void compEnumModel(Map<Integer, String> classInfoMap, List<Map<Integer, String>> fieldInfoMapList) {
+	private static void compEnumModel(Map<Integer, String> classInfoMap, List<Map<Integer, String>> fieldInfoMapList, VelocityTextWriter writer) {
 		
 		List<EnumFieldModel> fieldModelList = new ArrayList<>();
 		
@@ -253,17 +290,42 @@ public class Enum2JavaGenetater {
 		}
 		
 		// Enumソース出力
-		writeEnumSrc(enumModel);
+		writeEnumSrc(enumModel, writer);
 	}
 	
 	/**
 	 * Enumソース出力
-	 * 
 	 * @param enumModel Enumモデル
+	 * @param writer Velocityテキスト出力支援クラスのインスタンス
 	 */
-	private static void writeEnumSrc(EnumModel enumModel) {
+	private static void writeEnumSrc(EnumModel enumModel, VelocityTextWriter writer) {
 		
-		// ●●●TODO：
+		EnumGenInitParam iniParam = EnumGenInitParam.getInstance();		// ※コーディングが長くなるので、ローカル変数に保持させているだけ
+		
+		// バインドリストを生成
+		List<Pair<String, Object>> bindObjList = new ArrayList<>();
+		bindObjList.add( Pair.of(iniParam.getTemplateModelBindName(), enumModel) );
+		
+		// 出力先ファイルパス生成
+		String writeFileName		= enumModel.getClassName() + ".java";										// 出力先-ファイル名
+		String writeTargetFilePath	= enumModel.getPackageName().replace(".", "/") + "/" + writeFileName;		// 出力先-相対ファイル名
+		String writeFullFilePath	= iniParam.getJavaSrcWriteDirPath() + writeTargetFilePath;					// 出力先-絶対ファイルパス
+		
+		// JAVAソースファイル生成
+		writer.createTextFile(EnumGenInitParam.getInstance().getTemplateFileName(), bindObjList, writeFullFilePath);
+		
+//		// 文字列生成
+//		String text = writer.createString(EnumGenInitParam.getInstance().getTemplateFileName(), bindObjList);
+//		
+//		System.out.println("------------------------------");
+//		System.out.println(text);
+//		System.out.println("------------------------------");
+		
+		// 途中経過メッセージ出力
+		StringBuilder message = new StringBuilder();
+		message.append(" -> [").append(writeTargetFilePath).append("] - 生成終了");
+		
+		System.out.println(message.toString());
 	}
 	
 }

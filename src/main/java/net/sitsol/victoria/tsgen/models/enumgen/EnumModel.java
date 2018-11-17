@@ -15,10 +15,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class EnumModel {
 	
-	private String packageName;
-	private String className;
-	private String classComment;
-	private List<EnumFieldModel> fieldModelList;
+	private String packageName;							// パッケージ名
+	private String className;							// 型名
+	private String classComment;						// 型コメント
+	private List<EnumFieldModel> fieldModelList;		// フィールドモデル名
 	
 	
 	public String getPackageName() {

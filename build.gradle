@@ -12,7 +12,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 group = 'net.sitsol.victoria'
-version = '0.0.2'
+version = '0.1.0'
 sourceCompatibility = 1.8
 
 repositories {
@@ -23,6 +23,7 @@ dependencies {
 	
 	// 各ツール共通
 	testCompile 'junit:junit:4.12'
+	compile 'org.apache.commons:commons-lang3:3.7'
 	compile 'org.apache.velocity:velocity:1.7'
 	compile 'org.projectlombok:lombok:1.18.0'
 	

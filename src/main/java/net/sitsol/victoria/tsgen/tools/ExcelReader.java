@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.sitsol.victoria.tsgen;
+package net.sitsol.victoria.tsgen.tools;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  * 
  * @author rei_shibano
  */
-public abstract class ExcelReadHelper {
+public abstract class ExcelReader {
 	
 	public static final int DEFAULT_MAX_READ_ROW_COUNT = 1000;
 	public static final int DEFAULT_MAX_READ_COL_COUNT = 100;
@@ -29,7 +29,7 @@ public abstract class ExcelReadHelper {
 	/**
 	 * コンストラクタ
 	 */
-	public ExcelReadHelper() {
+	public ExcelReader() {
 		this(DEFAULT_MAX_READ_ROW_COUNT, DEFAULT_MAX_READ_COL_COUNT);
 	}
 	
@@ -38,7 +38,7 @@ public abstract class ExcelReadHelper {
 	 * @param maxReadRowCount 最大読込み行数
 	 * @param maxReadColCount 最大読込み列数
 	 */
-	public ExcelReadHelper(int maxReadRowCount, int maxReadColCount) {
+	public ExcelReader(int maxReadRowCount, int maxReadColCount) {
 		this.maxReadRowCount = maxReadRowCount;
 		this.maxReadColCount = maxReadColCount;
 	}

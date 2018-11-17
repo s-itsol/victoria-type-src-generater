@@ -5,7 +5,6 @@ package net.sitsol.victoria.tsgen.configs;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
@@ -25,30 +24,29 @@ public class EnumGenInitParam {
 		return instance_;
 	}
 	
-	public static final String DELAULT_PROP_RESOURCE_PATH	= "example_enumgen/enumgen.properties";
+	public static final String DELAULT_CONFIG_RESOURCE_PATH = "example_enumgen/enumgen.xml";
 	
 	private Properties props = new Properties();		// プロパティリソース
 	
 	/**
 	 * 初期処理
-	 * @param propFilePath プロパティファイルパス
+	 * @param configFilePath 設定ファイルパス
 	 */
-	public static void init(String propFilePath) {
+	public static void init(String configFilePath) {
 		
 		try (
-			InputStream inputStream = propFilePath == null
-										? ClassLoader.getSystemResourceAsStream(DELAULT_PROP_RESOURCE_PATH)
-										: new FileInputStream(propFilePath)
+			InputStream inputStream = configFilePath == null
+										? ClassLoader.getSystemResourceAsStream(DELAULT_CONFIG_RESOURCE_PATH)
+										: new FileInputStream(configFilePath)
 			;
-			InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");		// ※プロパティファイルの文字コードは固定にしてしまう
 		) {
-			// プロパティファイル読込み
-			EnumGenInitParam.getInstance().props.load(reader);
+			// 設定ファイル読込み
+			EnumGenInitParam.getInstance().getProps().loadFromXML(inputStream);;
 			
 		} catch(Exception ex) {
 			
-			throw new RuntimeException("プロパティファイルの読込みでエラーが発生しました。"
-											+ "プロパティファイルパス：[" + propFilePath + "]"
+			throw new RuntimeException("設定ファイルの読込みでエラーが発生しました。"
+											+ "ファイルパス：[" + configFilePath + "]"
 										, ex
 			);
 		}
@@ -58,6 +56,14 @@ public class EnumGenInitParam {
 	 * デフォルトコンストラクタ
 	 */
 	public EnumGenInitParam() { }
+
+	/**
+	 * プロパティリソース取得
+	 * @return プロパティリソースのインスタンス
+	 */
+	protected Properties getProps() {
+		return props;
+	}
 
 	/**
 	 * 文字列値取得
@@ -87,6 +93,8 @@ public class EnumGenInitParam {
 		return "1".equals(this.getStringValue(key));
 	}
 
+	// ※以下、プロパティ値取得のラッパー
+	
 	public boolean isReadTestMode() {
 		return this.getBooleanValue("readTestModeFlg");
 	}
@@ -130,9 +138,31 @@ public class EnumGenInitParam {
 	public int getEnumDecodeColIdx() {
 		return this.getIntValue("enumDecodeColIdx");
 	}
+
 	
-	public Properties getProps() {
-		return props;
+	
+	public String getTemplateReadDirPath() {
+		return this.getStringValue("templateReadDirPath");
+	}
+
+	public String getTemplateFileName() {
+		return this.getStringValue("templateFileName");
+	}
+
+	public String getTemplateModelBindName() {
+		return this.getStringValue("templateModelBindName");
+	}
+
+	public String getTemplateFileEncoding() {
+		return this.getStringValue("templateFileEncoding");
+	}
+
+	public String getJavaSrcFileEncoding() {
+		return this.getStringValue("javaSrcFileEncoding");
+	}
+
+	public String getJavaSrcWriteDirPath() {
+		return this.getStringValue("javaSrcWriteDirPath");
 	}
 
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>[サンプル]Enum2JAVAジェネレータ設定</comment>
+
+	<!-- 読込みテストモードフラグ ※ONにすると、ソース生成を行わず、代わりに読込み内容をコンソール出力する -->
+	<entry key="readTestModeFlg">0</entry>
+
+	<!-- Enum一覧ファイルパス -->
+	<entry key="enumFilePath">/Dev/Java/workspace/victoria-type-src-generater/src/main/resources/example_enumgen/enum_sample.xlsx</entry>
+	<!-- シート名 -->
+	<entry key="enumSheetName">Enum一覧サンプル</entry>
+
+	<!-- 行インデックス：値開始 -->
+	<entry key="valueStartRowIdx">1</entry>
+
+	<!-- 列インデックス：Enumパッケージ -->
+	<entry key="enumPackageNameColIdx">0</entry>
+	<!-- 列インデックス：Enumパッケージ -->
+	<entry key="enumPackageNameColIdx">0</entry>
+	<!-- 列インデックス：Enumクラス名 -->
+	<entry key="enumClassNameColIdx">1</entry>
+	<!-- 列インデックス：Enumクラスコメント -->
+	<entry key="enumClassCommentColIdx">2</entry>
+	<!-- 列インデックス：Enumフィールド名 -->
+	<entry key="enumFieldNameColIdx">3</entry>
+	<!-- 列インデックス：Enumフィールドコメント -->
+	<entry key="enumFieldCommentColIdx">4</entry>
+	<!-- 列インデックス：Enumコード値 -->
+	<entry key="enumCodeColIdx">5</entry>
+	<!-- 列インデックス：Enumデコード値 -->
+	<entry key="enumDecodeColIdx">6</entry>
+
+	<!-- テンプレート読込みディレクトリパス -->
+	<entry key="templateReadDirPath">/Dev/Java/workspace/victoria-type-src-generater/src/main/resources/example_enumgen/</entry>
+	<!-- テンプレートファイル名 -->
+	<entry key="templateFileName">java_source_template.vm</entry>
+	<!-- テンプレート内-Enumモデル変数名 -->
+	<entry key="templateModelBindName">enumModel</entry>
+	<!-- テンプレートファイルエンコーディング -->
+	<entry key="templateFileEncoding">UTF-8</entry>
+
+	<!-- 生成JAVAソースファイルエンコーディング -->
+	<entry key="javaSrcFileEncoding">UTF-8</entry>
+	<!-- 生成JAVAソース出力先ディレクトリパス -->
+	<entry key="javaSrcWriteDirPath">/Dev/Java/workspace/victoria-type-src-generater/bin/enumgen/</entry>
+
+</properties>

@@ -16,7 +16,7 @@ public class EnumFieldModel {
 	private String fieldName;			// フィールド名
 	private String fieldComment;		// フィールドコメント
 	private String code;				// コード値
-	private String decode;				// デコード値
+	private String decode;				// デコード文字列
 	
 	public String getFieldName() {
 		return fieldName;
