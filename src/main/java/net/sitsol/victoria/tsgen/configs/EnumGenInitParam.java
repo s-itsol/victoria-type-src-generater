@@ -5,6 +5,7 @@ package net.sitsol.victoria.tsgen.configs;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
@@ -24,7 +25,7 @@ public class EnumGenInitParam {
 		return instance_;
 	}
 	
-	public static final String DELAULT_PROP_RESOURCE_PATH = "example_enumgen/enumgen.properties";
+	public static final String DELAULT_PROP_RESOURCE_PATH	= "example_enumgen/enumgen.properties";
 	
 	private Properties props = new Properties();		// プロパティリソース
 	
@@ -34,14 +35,15 @@ public class EnumGenInitParam {
 	 */
 	public static void init(String propFilePath) {
 		
-		
 		try (
 			InputStream inputStream = propFilePath == null
 										? ClassLoader.getSystemResourceAsStream(DELAULT_PROP_RESOURCE_PATH)
 										: new FileInputStream(propFilePath)
+			;
+			InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");		// ※プロパティファイルの文字コードは固定にしてしまう
 		) {
 			// プロパティファイル読込み
-			EnumGenInitParam.getInstance().props.load(inputStream);
+			EnumGenInitParam.getInstance().props.load(reader);
 			
 		} catch(Exception ex) {
 			
