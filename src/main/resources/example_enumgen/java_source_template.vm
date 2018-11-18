@@ -2,22 +2,29 @@
 ## [サンプル]生成JAVAソーステンプレート
 ##
 ##	＜vm変数-クラス型＞
-##	$enumModel：net.sitsol.victoria.tsgen.models.enumgen.EnumModel
+##	$enumModel		：net.sitsol.victoria.tsgen.models.enumgen.EnumModel
+##	$velocityCount	：Velocity搭載のループカウンタ ※デフォルト：1オリジン
+##
+##	＜テンプレート補足＞
+##	下記インタフェースを実装する想定のテンプレートになっている。
+##	https://github.com/s-itsol/victoria/blob/master/src/main/java/net/sitsol/victoria/enums/VctEnumAccessible.java
 ##
 ################################################################################
-package ${enumModel.getPackageName()}
+package ${enumModel.getPackageName()};
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sitsol.victoria.enums.VctEnumAccessible;
+
 /**
- * Enum定数クラス「${enumModel.getClassComment()}」
+ * victoriaデモ用-Enum定数「${enumModel.getClassComment()}」
  * 
  * @author vitoria-type-src-generater
  */
-public enum ${enumModel.getClassName()} {
+public enum ${enumModel.getClassName()} implements VctEnumAccessible {
 
 ## フィールドモデルのループ
 #foreach($enumFieldModel in $enumModel.getFieldModelList())##
@@ -94,6 +101,7 @@ public enum ${enumModel.getClassName()} {
 	/**
 	 * コード値
 	 */
+	@Override
 	public String getCode() {
 		return this.code;
 	}
@@ -101,6 +109,7 @@ public enum ${enumModel.getClassName()} {
 	/**
 	 * デコード文字列
 	 */
+	@Override
 	public String getDecode() {
 		return this.decode;
 	}
