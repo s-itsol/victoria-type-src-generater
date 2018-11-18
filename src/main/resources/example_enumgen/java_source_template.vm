@@ -12,10 +12,9 @@
 ################################################################################
 package ${enumModel.getPackageName()};
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.sitsol.victoria.enums.VctEnumAccessible;
 
@@ -37,31 +36,15 @@ public enum ${enumModel.getClassName()} implements VctEnumAccessible {
 #end##
 	;
 
-	/** 全型リスト */
-	private static final List<${enumModel.getClassName()}> allTypeList_;
-	/** コード値-型マップ */
-	private static final Map<String, ${enumModel.getClassName()}> codeTypeMap_;
-
 	/**
-	 * スタティック・イニシャライザ
-	 */
-	static {
-		
-		${enumModel.getClassName()}[] allTypes = ${enumModel.getClassName()}.values();
-		
-		allTypeList_ = Arrays.asList(allTypes);
-		
-		codeTypeMap_ = new LinkedHashMap<String, ${enumModel.getClassName()}>(allTypes.length);
-		for ( ${enumModel.getClassName()} enumType : allTypes ) {
-			codeTypeMap_.put(enumType.getCode(), enumType);
-		}
-	}
-
-	/**
-	 * 全型リスト
+	 * 全型リスト取得
+	 *  ※読取専用で使う際には、暗黙の静的メソッド「values()」の方が若干軽量なのだが、
+	 *    「10万回実行したら、30～80msほど遅かった」程度だったので、「ほぼ劣化は無し」という見立て。
+	 *    かつ、eclipseの「呼び出し階層を開く」の検索対象にでき、調査／保守の観点からも、
+	 *    アプリでは常にこちらの使用を推奨する。
 	 */
 	public static List<${enumModel.getClassName()}> getAllTypeList() {
-		return allTypeList_;
+		return new ArrayList<>( Arrays.asList(${enumModel.getClassName()}.values()) );
 	}
 
 	/**
@@ -70,7 +53,28 @@ public enum ${enumModel.getClassName()} implements VctEnumAccessible {
 	 * @return 型 ※該当なしの場合はnull
 	 */
 	public static ${enumModel.getClassName()} getType(String code) {
-		return codeTypeMap_.get(code);
+		
+		${enumModel.getClassName()} retEnumType = null;
+		
+		// 型ループ
+		for ( ${enumModel.getClassName()} enumType : ${enumModel.getClassName()}.values() ) {
+			// コード値が一致したら、戻り値として確定
+			if ( enumType.getCode().equals(code) ) {
+				retEnumType = enumType;
+				break;
+			}
+		}
+		
+		return retEnumType;
+		
+		// ※参考までに、ラムダ式でコーディングするなら以下。
+		//   …なのだが、既に配列は生成済みなので、streamの効果は出ないはず。。
+		//   であれば、わざわざJAVA8未満で動かないソースを生成させる理由も無い…という判断。
+//		return Arrays.stream(${enumModel.getClassName()}.values())
+//					.filter( enumType -> enumType.getCode().equals(code) )
+//					.findFirst()
+//					.orElse(null)
+//		; 
 	}
 
 	/**
