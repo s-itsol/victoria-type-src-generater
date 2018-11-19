@@ -4,7 +4,9 @@
 package net.sitsol.victoria.tsgen.tools;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
@@ -133,7 +135,8 @@ public class VelocityTextWriter {
 			}
 			
 			try (
-				Writer writer = new FileWriter(writeFile);
+				OutputStream outStream = new FileOutputStream(writeFile);
+				Writer writer = new OutputStreamWriter(outStream, this.getOutputEncoding());
 			) {
 				// リソース出力
 				this.writeResource(templateFineName, bindObjList, writer);
